@@ -1,7 +1,7 @@
-// +build !appengine
+// +build appengine
 
 /*
- Author: jim teeuwen <jimteeuwen@gmail.com>
+ Author: jim teeuwen <jimteeuwen@gmail.com>, Edited By Karthic Rao <kartronics85@gmail.com> To get it working on App engine
  Dependencies: go-pkg-xmlx (http://github.com/jteeuwen/go-pkg-xmlx)
 
  This package allows us to fetch Rss and Atom feeds from the internet.
@@ -29,7 +29,9 @@ package feeder
 
 import (
 	"fmt"
-	"net/http"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/urlfetch"
+
 	"strconv"
 	"strings"
 	"time"
@@ -151,8 +153,10 @@ func (this *Feed) IgnoreCacheOnce() {
 // default from Go's xml package.
 //
 // This is equivalent to calling FetchClient with http.DefaultClient
-func (this *Feed) Fetch(uri string, charset xmlx.CharsetFunc) (err error) {
-	return this.FetchClient(uri, http.DefaultClient, charset)
+func (this *Feed) Fetch(uri string, charset xmlx.CharsetFunc, appEngineContext context.Context) (err error) {
+	//using urlclient to make sure that the requests could go through App engine
+	client := urlfetch.Client(appEngineContext)
+	return this.FetchClient(uri, client, charset)
 }
 
 // Fetch retrieves the feed's latest content if necessary.
